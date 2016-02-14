@@ -1,0 +1,189 @@
+<html>
+<head>
+	<style>
+
+	body {
+		font-family: sans-serif;
+	}
+
+	#hashes {
+		font-family: monospace;
+	}
+
+	#messages {
+		height: 50px;
+	}
+
+	#info {
+		font-size: 10px;
+	}
+
+	.ball {
+		width: 50px; /* Icon width */
+    	height: 50px; /* Icon height */
+    	display: inline-block; /* Display icon as inline block */
+		background: url("./balls.jpg") no-repeat;
+	}
+
+	.ball1  { background-position:   0px    0px; }
+	.ball2  { background-position: -50px    0px; }
+	.ball3  { background-position: -100px   0px; }
+	.ball4  { background-position: -150px   0px; }
+	.ball5  { background-position: -200px   0px; }
+	.ball6  { background-position: -250px   0px; }
+	.ball7  { background-position: -300px   0px; }
+
+	.ball8  { background-position:    0px  -50px; }
+	.ball9  { background-position:  -50px  -50px; }
+	.ball10 { background-position: -100px  -50px; }
+	.ball11 { background-position: -150px  -50px; }
+	.ball12 { background-position: -200px  -50px; }
+	.ball13 { background-position: -250px  -50px; }
+	.ball14 { background-position: -300px  -50px; }
+
+	.ball15 { background-position:    0px -100px; }
+	.ball16 { background-position:  -50px -100px; }
+	.ball17 { background-position: -100px -100px; }
+	.ball18 { background-position: -150px -100px; }
+	.ball19 { background-position: -200px -100px; }
+	.ball20 { background-position: -250px -100px; }
+	.ball21 { background-position: -300px -100px; }
+
+	.ball22 { background-position:    0px -150px; }
+	.ball23 { background-position:  -50px -150px; }
+	.ball24 { background-position: -100px -150px; }
+	.ball25 { background-position: -150px -150px; }
+	.ball26 { background-position: -200px -150px; }
+	.ball27 { background-position: -250px -150px; }
+	.ball28 { background-position: -300px -150px; }
+
+	.ball29 { background-position:    0px -200px; }
+	.ball30 { background-position:  -50px -200px; }
+	.ball31 { background-position: -100px -200px; }
+	.ball32 { background-position: -150px -200px; }
+	.ball33 { background-position: -200px -200px; }
+	.ball34 { background-position: -250px -200px; }
+	.ball35 { background-position: -300px -200px; }
+
+	.ball36 { background-position:    0px -250px; }
+	.ball37 { background-position:  -50px -250px; }
+	.ball38 { background-position: -100px -250px; }
+	.ball39 { background-position: -150px -250px; }
+	.ball40 { background-position: -200px -250px; }
+	.ball41 { background-position: -250px -250px; }
+	.ball42 { background-position: -300px -250px; }
+
+	.ball43 { background-position:    0px -300px; }
+	.ball44 { background-position:  -50px -300px; }
+	.ball45 { background-position: -100px -300px; }
+	.ball46 { background-position: -150px -300px; }
+	.ball47 { background-position: -200px -300px; }
+	.ball48 { background-position: -250px -300px; }
+	.ball49 { background-position: -300px -300px; }
+
+	</style>
+
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+
+	<script>
+
+	var numbers = {};
+	var iterations = 0;
+
+	function processHash(hash) {
+		console.log(hash);
+
+		for (var i = 0; i < hash.length; i+=2) {
+			var n = hash[i] + hash[i+1];
+			var number = (parseInt(n, 16) % 36) + 1;
+			numbers[number] = (numbers[number] || 0) + 1;
+	 	}
+
+		$('#hashes').append("<li>" + hash + "</li>");
+
+		iterations++;
+		if (iterations === 5) {
+			iterations = 0;
+			printTop6();
+		}
+	}
+
+	function printTop6() {
+		var list = [];
+		for (var key in numbers) {
+			list.push([key, numbers[key]]);
+		}
+
+		list.sort(function(a, b) {
+			return b[1] - a[1];
+		});
+
+		var winners = [];
+		for (var i = 0; i < 6; i++) {
+			winners.push(+list[i][0]);
+		}
+
+		var html = winners.sort(function(a,b) {
+			return a - b;
+		}).map(function(num) {
+			return "<div class='ball ball" + num + "'></div>";
+		});
+
+		$('#hashes').html("");
+
+		$('#messages').fadeOut("fast", function() {
+		 	$('#messages').html(html.join(''));
+			$('#messages').fadeIn("fast");
+		});
+
+
+		numbers = {};
+	}
+
+	</script>
+
+</head>
+<body>
+	<h1>Blockchain lottery numbers</h1>
+	<p id="info">
+		Iterate every 5 blockchain messages.
+		<br />
+		Balls numbered 1 to 49.
+	</p>
+	<div id="messages">Waiting for blockchain....</div>
+	<p>Blockchain WebSocket</p>
+	<div><ul id="hashes"></ul></div>
+
+	<script>
+		var btcs = new WebSocket('wss://ws.blockchain.info/inv');
+
+		btcs.onopen = function() {
+			var op1 = {
+				op : "set_tx_mini"
+			};
+
+			btcs.send( JSON.stringify(op1));
+
+			var op2 = {
+				op : "unconfirmed_sub"
+			};
+
+			btcs.send( JSON.stringify(op2));
+
+			var op3 = {
+				op : "blocks_sub"
+			};
+
+			btcs.send( JSON.stringify(op3));
+
+		};
+
+		btcs.onmessage = function(onmsg) {
+			processHash(JSON.parse(onmsg.data).x.hash);
+		}
+
+	</script>
+
+</body>
+
+</html>

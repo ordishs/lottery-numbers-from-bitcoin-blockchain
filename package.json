@@ -1,0 +1,17 @@
+{
+  "name": "bitcoin_numbers",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bitcoinjs-lib": "^2.2.0",
+    "blockchain": "^1.0.6",
+    "ws": "^1.0.1"
+  }
+}
